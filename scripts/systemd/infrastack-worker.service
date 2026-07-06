@@ -1,0 +1,16 @@
+[Unit]
+Description=Infrastack worker
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/infrastack
+Environment=INFRASTACK_DATA_DIR=/var/infrastack/data
+Environment=INFRASTACK_URL_SCHEME=https
+Environment=INFRASTACK_DOMAIN_SUFFIX=yourdomain.com
+ExecStart=/usr/bin/node /root/infrastack/apps/worker/dist/index.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

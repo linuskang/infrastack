@@ -1,0 +1,13 @@
+[Unit]
+Description=Infrastack Caddy reverse proxy
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/infrastack
+ExecStart=/usr/bin/caddy run --config /root/infrastack/packages/caddy/caddy.production.json
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

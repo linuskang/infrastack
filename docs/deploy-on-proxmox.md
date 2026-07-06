@@ -1,6 +1,8 @@
 # Deploy the Infrastack backend on Proxmox VE
 
-This guide sets up the Infrastack control plane, worker, and Caddy router inside a Proxmox VE LXC container.
+This guide sets up the Infrastack control plane, worker, and Caddy router inside a Proxmox VE LXC container using systemd services.
+
+For a simpler Docker Compose deployment, see [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
 
 ## Prerequisites
 
@@ -55,8 +57,8 @@ curl -sSL https://nixpacks.com/install.sh | bash
 ## 3. Clone and build Infrastack
 
 ```bash
-git clone <your-repo-url> /opt/infrastack
-cd /opt/infrastack
+git clone <your-repo-url> /root/infrastack
+cd /root/infrastack
 npm install
 npx turbo build
 ```
@@ -71,36 +73,12 @@ This holds the SQLite database, uploaded tarballs, and extracted build contexts.
 
 ## 5. Configure Caddy
 
-Use this base production config at `/opt/infrastack/packages/caddy/caddy.production.json`:
-
-```json
-{
-  "admin": { "listen": "localhost:2019" },
-  "apps": {
-    "http": {
-      "servers": {
-        "srv0": {
-          "listen": [":80", ":443"],
-          "routes": [],
-          "tls_connection_policies": [{}]
-        }
-      }
-    },
-    "tls": {
-      "automation": {
-        "on_demand": {
-          "ask": "http://localhost:8787/v1/domains/allowed"
-        }
-      }
-    }
-  }
-}
-```
+The production Caddy config is already in the repo at `/root/infrastack/packages/caddy/caddy.production.json`. It enables on-demand TLS and asks the control plane which domains are allowed.
 
 Start Caddy:
 
 ```bash
-caddy run --config /opt/infrastack/packages/caddy/caddy.production.json
+caddy run --config /root/infrastack/packages/caddy/caddy.production.json
 ```
 
 For local testing without TLS, use the included `packages/caddy/caddy.json`.
@@ -109,53 +87,21 @@ For local testing without TLS, use the included `packages/caddy/caddy.json`.
 
 ### With systemd
 
-Create `/etc/systemd/system/infrastack-backend.service`:
+Service files are in the repo at `scripts/systemd/`. Copy them and edit the worker service to set your domain:
 
-```ini
-[Unit]
-Description=Infrastack control plane
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/infrastack
-Environment=INFRASTACK_DATA_DIR=/var/infrastack/data
-Environment=PORT=8787
-ExecStart=/usr/bin/node /opt/infrastack/apps/backend/dist/index.js
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
+```bash
+cp /root/infrastack/scripts/systemd/infrastack-*.service /etc/systemd/system/
+# Edit INFRASTACK_DOMAIN_SUFFIX in the worker service
+nano /etc/systemd/system/infrastack-worker.service
 ```
 
-Create `/etc/systemd/system/infrastack-worker.service`:
-
-```ini
-[Unit]
-Description=Infrastack worker
-After=network.target docker.service
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/infrastack
-Environment=INFRASTACK_DATA_DIR=/var/infrastack/data
-Environment=INFRASTACK_URL_SCHEME=https
-Environment=INFRASTACK_DOMAIN_SUFFIX=yourdomain.com
-ExecStart=/usr/bin/node /opt/infrastack/apps/worker/dist/index.js
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Reload and start:
+Reload and start all three services:
 
 ```bash
 systemctl daemon-reload
 systemctl enable --now infrastack-backend
 systemctl enable --now infrastack-worker
+systemctl enable --now infrastack-caddy
 ```
 
 ## 7. Network and DNS
@@ -180,7 +126,7 @@ The CLI prints a URL like `https://my-app.yourdomain.com`.
 Pull changes, rebuild, and restart:
 
 ```bash
-cd /opt/infrastack
+cd /root/infrastack
 git pull
 npm install
 npx turbo build

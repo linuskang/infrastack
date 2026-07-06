@@ -94,8 +94,9 @@ export async function processDeploy(deployId: string): Promise<void> {
     const hostPort = portStdout.trim().split(":").pop()
     if (!hostPort) throw new Error("Could not determine host port")
 
+    const dockerHost = process.env.DOCKER_HOST_NAME ?? "localhost"
     const healthPath = service.healthcheck?.path ?? "/"
-    const healthUrl = `http://localhost:${hostPort}${healthPath}`
+    const healthUrl = `http://${dockerHost}:${hostPort}${healthPath}`
     await probeHealth(healthUrl)
 
     const url = buildDeployUrl(app.slug)
@@ -158,12 +159,13 @@ async function probeHealth(url: string, retries = 30): Promise<void> {
 }
 
 async function syncCaddyRoutes(): Promise<void> {
+  const dockerHost = process.env.DOCKER_HOST_NAME ?? "localhost"
   const deploys = listReadyDeploys()
   const routes = deploys
     .filter((d) => d.url && d.hostPort)
     .map((d) => ({
       host: new URL(d.url as string).hostname,
-      dial: `localhost:${d.hostPort as string}`,
+      dial: `${dockerHost}:${d.hostPort as string}`,
     }))
   await syncRoutes(routes)
 }

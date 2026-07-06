@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: infrastack-backend
+    ports:
+      - "8787:8787"
+    volumes:
+      - infrastack-data:/data
+    environment:
+      - INFRASTACK_DATA_DIR=/data
+      - PORT=8787
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: infrastack-worker
+    volumes:
+      - infrastack-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - INFRASTACK_DATA_DIR=/data
+      - INFRASTACK_URL_SCHEME=https
+      - INFRASTACK_DOMAIN_SUFFIX=${INFRASTACK_DOMAIN_SUFFIX:-yourdomain.com}
+      - CADDY_ADMIN_URL=http://caddy:2019
+      - DOCKER_HOST_NAME=host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - caddy
+
+  caddy:
+    image: caddy:2
+    container_name: infrastack-caddy
+    command:
+      - "caddy"
+      - "run"
+      - "--config"
+      - "/etc/caddy/caddy.docker.json"
+      - "--adapter"
+      - "json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./packages/caddy/caddy.docker.json:/etc/caddy/caddy.docker.json
+      - caddy-data:/data
+      - caddy-config:/config
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  infrastack-data:
+  caddy-data:
+  caddy-config:
