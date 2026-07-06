@@ -17,6 +17,7 @@
     "tar": "^7.4.3"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "@workspace/eslint-config": "*",
     "@workspace/typescript-config": "*",
     "cross-env": "^7.0.3",
