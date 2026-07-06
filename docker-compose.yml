@@ -2,10 +2,7 @@ version: "3.8"
 
 services:
   backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    image: ${INFRASTACK_IMAGE_PREFIX:-ghcr.io/your-username}/infrastack-backend:latest
+    image: ${INFRASTACK_IMAGE_PREFIX:-ghcr.io/linuskang}/infrastack-backend:latest
     container_name: infrastack-backend
     ports:
       - "8787:8787"
@@ -17,10 +14,7 @@ services:
     restart: unless-stopped
 
   worker:
-    build:
-      context: .
-      dockerfile: apps/worker/Dockerfile
-    image: ${INFRASTACK_IMAGE_PREFIX:-ghcr.io/your-username}/infrastack-worker:latest
+    image: ${INFRASTACK_IMAGE_PREFIX:-ghcr.io/linuskang}/infrastack-worker:latest
     container_name: infrastack-worker
     volumes:
       - infrastack-data:/data
