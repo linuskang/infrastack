@@ -1,22 +1,19 @@
 # Deploy the Infrastack backend on Proxmox VE
 
-This guide sets up the Infrastack control plane, worker, and Caddy router inside a Proxmox VE LXC container using systemd services.
+This guide runs the Infrastack backend on a Proxmox VE LXC container using Docker Compose.
 
-For a simpler Docker Compose deployment, see [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
+For the generic Docker Compose instructions, see [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
+
+For a manual systemd setup instead of Docker Compose, use the service files in `scripts/systemd/`.
 
 ## Prerequisites
 
 - Proxmox VE 8+ with a working network
-- A Debian/Ubuntu LXC container with:
-  - Node.js 20+
-  - npm
-  - Docker (see Docker in LXC notes below)
-  - Caddy 2+
-  - (optional) Nixpacks, if you want auto-builds without Dockerfiles
+- A privileged Debian/Ubuntu LXC container with Docker and Docker Compose installed
 
 ## 1. Create the LXC container
 
-Create a privileged container or an unprivileged container with Docker cgroup access. For v0, a privileged container is simplest:
+A privileged container is simplest because the worker needs to spawn sibling Docker containers:
 
 ```bash
 pct create 100 local:vztmpl/debian-12-standard_12.x-x_amd64.tar.zst \
@@ -26,91 +23,55 @@ pct create 100 local:vztmpl/debian-12-standard_12.x-x_amd64.tar.zst \
   --rootfs local-lvm:32 \
   --net0 name=eth0,bridge=vmbr0,ip=dhcp
 pct start 100
+pct enter 100
 ```
 
 Adjust CPU, memory, disk, and network to your needs.
 
-## 2. Install dependencies inside the container
+## 2. Install Docker and Docker Compose
 
 ```bash
-pct enter 100
-
-# Install Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt-get install -y nodejs
-
 # Install Docker
 curl -fsSL https://get.docker.com | sh
 systemctl enable --now docker
 
-# Install Caddy
-apt-get install -y debian-keyring debian-archive-keyring apt-transport-https
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+# Install Docker Compose plugin
 apt-get update
-apt-get install -y caddy
-
-# Install Nixpacks (optional)
-curl -sSL https://nixpacks.com/install.sh | bash
+apt-get install -y docker-compose-plugin
 ```
 
-## 3. Clone and build Infrastack
+## 3. Clone the repo
 
 ```bash
 git clone <your-repo-url> /root/infrastack
 cd /root/infrastack
-npm install
-npx turbo build
 ```
 
-## 4. Create a data directory
+## 4. Start Infrastack
 
 ```bash
-mkdir -p /var/infrastack/data
+export INFRASTACK_DOMAIN_SUFFIX=yourdomain.com
+docker compose up -d --build
 ```
 
-This holds the SQLite database, uploaded tarballs, and extracted build contexts.
+This builds and starts the backend, worker, and Caddy containers.
 
-## 5. Configure Caddy
+To use pre-built images from GitHub Container Registry instead of building on the container, see the GHCR section in [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
 
-The production Caddy config is already in the repo at `/root/infrastack/packages/caddy/caddy.production.json`. It enables on-demand TLS and asks the control plane which domains are allowed.
-
-Start Caddy:
+## 5. Check status
 
 ```bash
-caddy run --config /root/infrastack/packages/caddy/caddy.production.json
+curl http://localhost:8787/health
+docker compose logs -f
 ```
 
-For local testing without TLS, use the included `packages/caddy/caddy.json`.
-
-## 6. Run the control plane and worker
-
-### With systemd
-
-Service files are in the repo at `scripts/systemd/`. Copy them and edit the worker service to set your domain:
-
-```bash
-cp /root/infrastack/scripts/systemd/infrastack-*.service /etc/systemd/system/
-# Edit INFRASTACK_DOMAIN_SUFFIX in the worker service
-nano /etc/systemd/system/infrastack-worker.service
-```
-
-Reload and start all three services:
-
-```bash
-systemctl daemon-reload
-systemctl enable --now infrastack-backend
-systemctl enable --now infrastack-worker
-systemctl enable --now infrastack-caddy
-```
-
-## 7. Network and DNS
+## 6. Network and DNS
 
 - Point a wildcard DNS record `*.yourdomain.com` to the container's IP, or create an A record per app.
 - Open ports 80, 443, and 8787 on the Proxmox firewall and any upstream router/firewall.
 - Port 8787 only needs to be reachable from where you run the CLI. Keep it off the public internet if possible; v0 has no authentication.
 
-## 8. Deploy an app
+## 7. Deploy an app
 
 From your app directory:
 
@@ -123,15 +84,21 @@ The CLI prints a URL like `https://my-app.yourdomain.com`.
 
 ## Updating the backend
 
-Pull changes, rebuild, and restart:
-
 ```bash
 cd /root/infrastack
 git pull
-npm install
-npx turbo build
-systemctl restart infrastack-backend
-systemctl restart infrastack-worker
+docker compose up -d --build
+```
+
+## Optional: manual systemd setup
+
+If you prefer not to use Docker Compose, copy the service files and start them manually:
+
+```bash
+cp /root/infrastack/scripts/systemd/infrastack-*.service /etc/systemd/system/
+nano /etc/systemd/system/infrastack-worker.service  # set INFRASTACK_DOMAIN_SUFFIX
+systemctl daemon-reload
+systemctl enable --now infrastack-backend infrastack-worker infrastack-caddy
 ```
 
 ## Docker in LXC notes

@@ -61,12 +61,52 @@ npx infrastack deploy
 - App containers publish ports on the host; Caddy reaches them via `host.docker.internal`.
 - Backend and worker share a Docker volume at `/data` for the SQLite database and uploaded tarballs.
 
+## Deploy from GHCR instead of building on the host
+
+The repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that builds and pushes images to GitHub Container Registry:
+
+- `ghcr.io/<your-github-username>/infrastack-backend:latest`
+- `ghcr.io/<your-github-username>/infrastack-worker:latest`
+
+On your host, set the image prefix and pull instead of building:
+
+```bash
+cd /root/infrastack
+
+# Create .env with your GitHub username/org and domain
+cat > .env <<EOF
+INFRASTACK_DOMAIN_SUFFIX=yourdomain.com
+INFRASTACK_IMAGE_PREFIX=ghcr.io/your-github-username
+EOF
+
+# Pull and run the pre-built images
+docker compose pull
+docker compose up -d
+```
+
+If the GHCR images are private, log in first:
+
+```bash
+echo $GITHUB_TOKEN | docker login ghcr.io -u your-github-username --password-stdin
+```
+
 ## Updating
+
+### Build locally
 
 ```bash
 cd /root/infrastack
 git pull
 docker compose up -d --build
+```
+
+### Pull latest GHCR images
+
+```bash
+cd /root/infrastack
+git pull
+docker compose pull
+docker compose up -d
 ```
 
 ## Notes
