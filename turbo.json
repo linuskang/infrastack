@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": ["CADDY_ADMIN_URL", "INFRASTACK_API_URL", "INFRASTACK_DATA_DIR", "INFRASTACK_DOMAIN_SUFFIX", "INFRASTACK_URL_SCHEME", "PORT"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

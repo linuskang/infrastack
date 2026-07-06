@@ -1,11 +1,8 @@
 {
-  "name": "@infrastack/backend",
+  "name": "@infrastack/worker",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "exports": {
-    "./db": "./dist/db.js"
-  },
   "scripts": {
     "dev": "cross-env INFRASTACK_DATA_DIR=../../data tsx watch src/index.ts",
     "build": "tsc",
@@ -15,13 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.1",
-    "better-sqlite3": "^12.1.0",
-    "hono": "^4.7.7",
-    "zod": "^3.25.7"
+    "@infrastack/backend": "*",
+    "@infrastack/caddy": "*",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@workspace/eslint-config": "*",
     "@workspace/typescript-config": "*",
     "cross-env": "^7.0.3",

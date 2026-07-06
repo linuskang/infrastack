@@ -28,13 +28,20 @@
     "./config": {
       "types": "./dist/config.d.ts",
       "default": "./dist/config.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk.d.ts",
+      "default": "./dist/sdk.js"
     }
   },
   "files": [
     "dist"
   ],
   "dependencies": {
-    "hono": "^4.7.7"
+    "hono": "^4.7.7",
+    "jiti": "^2.4.2",
+    "picocolors": "^1.1.1",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "@workspace/eslint-config": "*",
