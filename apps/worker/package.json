@@ -1,27 +1,39 @@
 {
-  "name": "@infrastack/worker",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "cross-env INFRASTACK_DATA_DIR=../../data tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "cross-env INFRASTACK_DATA_DIR=../../data node dist/index.js",
-    "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@infrastack/backend": "*",
-    "@infrastack/caddy": "*",
-    "tar": "^7.4.3"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@workspace/eslint-config": "*",
-    "@workspace/typescript-config": "*",
-    "cross-env": "^7.0.3",
-    "tsx": "^4.19.4",
-    "typescript": "^5"
-  }
+    "name": "@infrastack/worker",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "description": "Infrastack builder + runner (Docker, Caddy sync).",
+    "license": "MIT",
+    "author": "Infrastack contributors",
+    "homepage": "https://github.com/linuskang/infrastack#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/linuskang/infrastack.git",
+        "directory": "apps/worker"
+    },
+    "bugs": {
+        "url": "https://github.com/linuskang/infrastack/issues"
+    },
+    "scripts": {
+        "dev": "cross-env INFRASTACK_DATA_DIR=../../data tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "cross-env INFRASTACK_DATA_DIR=../../data node dist/index.js",
+        "lint": "eslint",
+        "format": "prettier --write \"**/*.{ts,tsx}\"",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@infrastack/backend": "*",
+        "@infrastack/caddy": "*",
+        "tar": "^7.4.3"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@workspace/eslint-config": "*",
+        "@workspace/typescript-config": "*",
+        "cross-env": "^7.0.3",
+        "tsx": "^4.19.4",
+        "typescript": "^5"
+    }
 }

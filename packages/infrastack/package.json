@@ -1,51 +1,61 @@
 {
-  "name": "infrastack",
-  "version": "0.0.1",
-  "description": "Infrastack CLI and shared infrastructure utilities",
-  "type": "module",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
-  "bin": {
-    "infrastack": "./dist/cli.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+    "name": "infrastack",
+    "version": "0.0.1",
+    "description": "Infrastack CLI, config DSL, and SDK for code-first deployments.",
+    "type": "module",
+    "license": "MIT",
+    "author": "Infrastack contributors",
+    "homepage": "https://github.com/linuskang/infrastack#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/linuskang/infrastack.git",
+        "directory": "packages/infrastack"
     },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "default": "./dist/server.js"
+    "bugs": {
+        "url": "https://github.com/linuskang/infrastack/issues"
     },
-    "./config": {
-      "types": "./dist/config.d.ts",
-      "default": "./dist/config.js"
+    "publishConfig": {
+        "access": "public"
     },
-    "./sdk": {
-      "types": "./dist/sdk.d.ts",
-      "default": "./dist/sdk.js"
+    "bin": {
+        "infrastack": "./dist/cli.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint",
+        "format": "prettier --write \"**/*.{ts,tsx}\"",
+        "typecheck": "tsc --noEmit"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./server": {
+            "types": "./dist/server.d.ts",
+            "default": "./dist/server.js"
+        },
+        "./config": {
+            "types": "./dist/config.d.ts",
+            "default": "./dist/config.js"
+        },
+        "./sdk": {
+            "types": "./dist/sdk.d.ts",
+            "default": "./dist/sdk.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "hono": "^4.7.7",
+        "jiti": "^2.4.2",
+        "picocolors": "^1.1.1",
+        "tar": "^7.4.3"
+    },
+    "devDependencies": {
+        "@workspace/eslint-config": "*",
+        "@workspace/typescript-config": "*",
+        "typescript": "^5"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "dependencies": {
-    "hono": "^4.7.7",
-    "jiti": "^2.4.2",
-    "picocolors": "^1.1.1",
-    "tar": "^7.4.3"
-  },
-  "devDependencies": {
-    "@workspace/eslint-config": "*",
-    "@workspace/typescript-config": "*",
-    "typescript": "^5"
-  }
 }

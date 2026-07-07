@@ -1,9 +1,20 @@
 {
-  "name": "@workspace/typescript-config",
-  "version": "0.0.0",
-  "private": true,
-  "license": "PROPRIETARY",
-  "publishConfig": {
-    "access": "public"
-  }
+    "name": "@workspace/typescript-config",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Shared TypeScript configuration for the Infrastack monorepo.",
+    "license": "MIT",
+    "author": "Infrastack contributors",
+    "homepage": "https://github.com/linuskang/infrastack#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/linuskang/infrastack.git",
+        "directory": "packages/typescript-config"
+    },
+    "bugs": {
+        "url": "https://github.com/linuskang/infrastack/issues"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

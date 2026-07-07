@@ -1,19 +1,24 @@
 # Deploy the Infrastack backend on Proxmox VE
 
-This guide runs the Infrastack backend on a Proxmox VE LXC container using Docker Compose.
+This guide runs the Infrastack backend on a Proxmox VE LXC container using
+Docker Compose.
 
-For the generic Docker Compose instructions, see [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
+For the generic Docker Compose instructions, see
+[Docker Compose](./docker-compose.md).
 
-For a manual systemd setup instead of Docker Compose, use the service files in `scripts/systemd/`.
+For a manual systemd setup instead of Docker Compose, use the service files in
+`scripts/systemd/`.
 
 ## Prerequisites
 
 - Proxmox VE 8+ with a working network
-- A privileged Debian/Ubuntu LXC container with Docker and Docker Compose installed
+- A privileged Debian/Ubuntu LXC container with Docker and Docker Compose
+  installed
 
 ## 1. Create the LXC container
 
-A privileged container is simplest because the worker needs to spawn sibling Docker containers:
+A privileged container is simplest because the worker needs to spawn sibling
+Docker containers:
 
 ```bash
 pct create 100 local:vztmpl/debian-12-standard_12.x-x_amd64.tar.zst \
@@ -43,7 +48,7 @@ apt-get install -y docker-compose-plugin
 ## 3. Clone the repo
 
 ```bash
-git clone <your-repo-url> /root/infrastack
+git clone https://github.com/linuskang/infrastack.git /root/infrastack
 cd /root/infrastack
 ```
 
@@ -51,12 +56,14 @@ cd /root/infrastack
 
 ```bash
 export INFRASTACK_DOMAIN_SUFFIX=yourdomain.com
-docker compose up -d --build
+docker compose up -d
 ```
 
-This builds and starts the backend, worker, and Caddy containers.
+This pulls and starts the backend, worker, and Caddy containers.
 
-To use pre-built images from GitHub Container Registry instead of building on the container, see the GHCR section in [`deploy-with-docker-compose.md`](./deploy-with-docker-compose.md).
+To use pre-built images from GitHub Container Registry instead of building on
+the container, see the GHCR section in
+[Docker Compose](./docker-compose.md).
 
 ## 5. Check status
 
@@ -67,9 +74,12 @@ docker compose logs -f
 
 ## 6. Network and DNS
 
-- Point a wildcard DNS record `*.yourdomain.com` to the container's IP, or create an A record per app.
-- Open ports 80, 443, and 8787 on the Proxmox firewall and any upstream router/firewall.
-- Port 8787 only needs to be reachable from where you run the CLI. Keep it off the public internet if possible; v0 has no authentication.
+- Point a wildcard DNS record `*.yourdomain.com` to the container's IP, or
+  create an A record per app.
+- Open ports 80, 443, and 8787 on the Proxmox firewall and any upstream
+  router/firewall.
+- Port 8787 only needs to be reachable from where you run the CLI. Keep it off
+  the public internet if possible; v0 has no authentication.
 
 ## 7. Deploy an app
 
@@ -87,12 +97,14 @@ The CLI prints a URL like `https://my-app.yourdomain.com`.
 ```bash
 cd /root/infrastack
 git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
 ## Optional: manual systemd setup
 
-If you prefer not to use Docker Compose, copy the service files and start them manually:
+If you prefer not to use Docker Compose, copy the service files and start them
+manually:
 
 ```bash
 cp /root/infrastack/scripts/systemd/infrastack-*.service /etc/systemd/system/
@@ -103,4 +115,6 @@ systemctl enable --now infrastack-backend infrastack-worker infrastack-caddy
 
 ## Docker in LXC notes
 
-If you use an unprivileged container, you need to allow cgroup access for Docker. The easiest path for v0 is a privileged container. If you want unprivileged, map host IDs and enable nesting/features in the container options.
+If you use an unprivileged container, you need to allow cgroup access for
+Docker. The easiest path for v0 is a privileged container. If you want
+unprivileged, map host IDs and enable nesting/features in the container options.

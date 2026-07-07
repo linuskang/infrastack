@@ -1,6 +1,7 @@
 # Deploy with Docker Compose
 
-This is the simplest way to run the whole Infrastack backend: backend, worker, and Caddy all run as Docker containers.
+This is the simplest way to run the whole Infrastack backend: backend, worker,
+and Caddy all run as Docker containers.
 
 ## Requirements
 
@@ -11,7 +12,7 @@ This is the simplest way to run the whole Infrastack backend: backend, worker, a
 ## 1. Clone the repo
 
 ```bash
-git clone <your-repo-url> /root/infrastack
+git clone https://github.com/linuskang/infrastack.git /root/infrastack
 cd /root/infrastack
 ```
 
@@ -30,10 +31,10 @@ echo "INFRASTACK_DOMAIN_SUFFIX=yourdomain.com" > .env
 ## 3. Start everything
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
-This builds and starts:
+This starts:
 
 - `infrastack-backend` on port `8787`
 - `infrastack-worker` with access to the host Docker socket
@@ -57,16 +58,21 @@ npx infrastack deploy
 
 ## How it works
 
-- The worker container mounts `/var/run/docker.sock` so it can build and run your app containers directly on the host.
-- App containers publish ports on the host; Caddy reaches them via `host.docker.internal`.
-- Backend and worker share a Docker volume at `/data` for the SQLite database and uploaded tarballs.
+- The worker container mounts `/var/run/docker.sock` so it can build and run
+  your app containers directly on the host.
+- App containers publish ports on the host; Caddy reaches them via
+  `host.docker.internal`.
+- Backend and worker share a Docker volume at `/data` for the SQLite database
+  and uploaded tarballs.
 
 ## Deploy from GHCR instead of building on the host
 
-The repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that builds and pushes images to GitHub Container Registry:
+The repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that
+builds and pushes images to GitHub Container Registry:
 
 - `ghcr.io/<your-github-username>/infrastack-backend:latest`
 - `ghcr.io/<your-github-username>/infrastack-worker:latest`
+- `ghcr.io/<your-github-username>/infrastack-caddy:latest`
 
 On your host, set the image prefix and pull instead of building:
 
@@ -92,14 +98,6 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u your-github-username --password-std
 
 ## Updating
 
-### Build locally
-
-```bash
-cd /root/infrastack
-git pull
-docker compose up -d --build
-```
-
 ### Pull latest GHCR images
 
 ```bash
@@ -109,7 +107,17 @@ docker compose pull
 docker compose up -d
 ```
 
+### Build locally
+
+```bash
+cd /root/infrastack
+git pull
+docker compose up -d --build
+```
+
 ## Notes
 
-- The worker service defaults to `yourdomain.com` if `INFRASTACK_DOMAIN_SUFFIX` is not set. Make sure to change it.
-- Port 8787 should be reachable from where you run the CLI. Keep it off the public internet if possible; v0 has no authentication.
+- The worker service defaults to `yourdomain.com` if `INFRASTACK_DOMAIN_SUFFIX`
+  is not set. Make sure to change it.
+- Port 8787 should be reachable from where you run the CLI. Keep it off the
+  public internet if possible; v0 has no authentication.

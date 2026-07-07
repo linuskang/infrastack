@@ -8,8 +8,6 @@
 npm install infrastack
 ```
 
-While Infrastack is not yet published to npm, install it from your local monorepo or from your private registry.
-
 2. Create a config file:
 
 ```bash
@@ -24,20 +22,20 @@ This writes `infrastack.config.mjs`.
 import { defineConfig, service } from "infrastack"
 
 export default defineConfig({
-  name: "my-app",
-  target: "managed",
-  services: [
-    service("web", {
-      port: 3000,
-      build: { dockerfile: "Dockerfile" },
-      env: {
-        NODE_ENV: "production",
-      },
-      healthcheck: {
-        path: "/health",
-      },
-    }),
-  ],
+    name: "my-app",
+    target: "managed",
+    services: [
+        service("web", {
+            port: 3000,
+            build: { dockerfile: "Dockerfile" },
+            env: {
+                NODE_ENV: "production",
+            },
+            healthcheck: {
+                path: "/health",
+            },
+        }),
+    ],
 })
 ```
 
@@ -65,10 +63,10 @@ The CLI prints a URL when the deploy is ready.
 - `name` (string) — service name
 - `port` (number, required) — port your app listens on inside the container
 - `build` (object)
-  - `dockerfile` (string) — path to Dockerfile, defaults to `"Dockerfile"`
+    - `dockerfile` (string) — path to Dockerfile, defaults to `"Dockerfile"`
 - `env` (Record<string, string>) — environment variables passed to the container
 - `healthcheck` (object)
-  - `path` (string) — HTTP path to probe, defaults to `"/"`
+    - `path` (string) — HTTP path to probe, defaults to `"/"`
 - `resources` (object) — not implemented in v0
 - `scaling` (object) — not implemented in v0
 
@@ -76,14 +74,16 @@ The CLI prints a URL when the deploy is ready.
 
 ### Global flags
 
-- `--api <url>` — control plane URL. Can also be set with `INFRASTACK_API_URL` env var.
+- `--api <url>` — control plane URL. Can also be set with `INFRASTACK_API_URL`
+  env var.
 - `--json` — output machine-readable JSON
 
 ### Commands
 
 - `npx infrastack init` — scaffold `infrastack.config.mjs`
 - `npx infrastack deploy` — deploy the current project
-- `npx infrastack status [deploy-id]` — show latest deploy status, or a specific deploy
+- `npx infrastack status [deploy-id]` — show latest deploy status, or a specific
+  deploy
 - `npx infrastack logs <deploy-id>` — show container logs
 - `npx infrastack version` — print version
 - `npx infrastack help` — show help
@@ -92,7 +92,8 @@ The CLI prints a URL when the deploy is ready.
 
 - Your app must listen on the `port` declared in the config.
 - Your app must respond with HTTP 200 on the `healthcheck.path`.
-- Either provide a `Dockerfile`, or install Nixpacks on the Infrastack backend host so it can auto-build your app.
+- Either provide a `Dockerfile`, or install Nixpacks on the Infrastack backend
+  host so it can auto-build your app.
 
 ## Example Dockerfile
 
