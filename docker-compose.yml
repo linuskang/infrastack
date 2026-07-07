@@ -38,8 +38,6 @@ services:
       - "run"
       - "--config"
       - "/etc/caddy/caddy.docker.json"
-      - "--adapter"
-      - "json"
     ports:
       - "80:80"
       - "443:443"
