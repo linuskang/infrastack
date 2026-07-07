@@ -67,6 +67,15 @@ jobs:
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Caddy image metadata
+        id: caddy-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/infrastack-caddy
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -86,5 +95,16 @@ jobs:
           push: true
           tags: ${{ steps.worker-meta.outputs.tags }}
           labels: ${{ steps.worker-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push caddy image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./packages/caddy
+          file: ./packages/caddy/Dockerfile
+          push: true
+          tags: ${{ steps.caddy-meta.outputs.tags }}
+          labels: ${{ steps.caddy-meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

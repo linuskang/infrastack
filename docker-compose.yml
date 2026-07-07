@@ -31,9 +31,7 @@ services:
       - caddy
 
   caddy:
-    build:
-      context: ./packages/caddy
-      dockerfile: Dockerfile
+    image: ${INFRASTACK_IMAGE_PREFIX:-ghcr.io/linuskang}/infrastack-caddy:latest
     container_name: infrastack-caddy
     command:
       - "caddy"
